@@ -17,6 +17,7 @@ export async function required({
   workflows: string[]
   statusName: string
 }): Promise<void> {
+  console.log(JSON.stringify(event, null, 2));
   const workflow = await octokit.rest.actions.getWorkflowRun({
     ...context.repo,
     run_id: event.workflow_run.id
