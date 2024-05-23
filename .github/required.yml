@@ -14,7 +14,7 @@ on:
 
 jobs:
   success:
-    if: github.event.workflow_run.event == 'pull_request'
+    if: contains(fromJSON('["merge_group", "pull_request"]'), github.event.workflow_run.event)
     name: Create appropriate status
     runs-on: ubuntu-latest
     steps:
