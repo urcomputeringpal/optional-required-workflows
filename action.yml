@@ -1,7 +1,7 @@
 name: Required workflows
 description: >-
-  Configure required workflows in your repository. Use path filters.
-  Leave your GitHub org administrator alone.
+  Configure required workflows in your repository. Use path filters. Leave your
+  GitHub org administrator alone.
 author: jnewland@urcomputeringpal.com
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
