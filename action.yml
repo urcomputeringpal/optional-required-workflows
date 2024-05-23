@@ -1,23 +1,28 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
-
+name: Required workflows
+description: >-
+  Configure required workflows in your repo. Use path filters. Be free.
+author: jnewland@urcomputeringpal.com
 # Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: 'heart'
-  color: 'red'
+  icon: 'check-circle'
+  color: 'green'
 
 # Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  token:
+    description: >-
+      Token to use to lookup workflow runs. Requires `actions: read`
+      permissions.
     required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+  status-name:
+    description: >
+      The status name use for reporting. You should mark this as required.
+    required: true
+  must-succeed-if-run:
+    description: >
+      A multi-line string of the names of workflows that must succeed if a run
+      is observed.
+    required: true
 
 runs:
   using: node20
