@@ -1,6 +1,7 @@
 # Required workflows
 
-Configure required workflows in your repository. Use path filters. Leave your GitHub org administrator alone.
+Configure required workflows in your repository. Use path filters. Leave your
+GitHub org administrator alone.
 
 ## Usage
 
@@ -20,7 +21,9 @@ on:
 
 jobs:
   success:
-    if: contains(fromJSON('["merge_group", "pull_request"]'), github.event.workflow_run.event)
+    if:
+      contains(fromJSON('["merge_group", "pull_request"]'),
+      github.event.workflow_run.event)
     name: Create appropriate status
     runs-on: ubuntu-latest
     steps:
