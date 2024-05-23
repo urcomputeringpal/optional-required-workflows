@@ -29238,17 +29238,24 @@ async function run() {
         const token = core.getInput('token', { required: true });
         const octokit = github.getOctokit(token);
         const { context } = github;
-        if (context.eventName !== 'workflow_run' &&
-            context.payload.action !== 'completed') {
+        if (context.eventName === 'workflow_run' &&
+            context.payload.action === 'completed' &&
+            context.payload.workflow !== undefined &&
+            context.payload.workflow_run !== undefined) {
+            const event = github.context
+                .payload;
+            await (0, required_1.required)({
+                octokit,
+                context,
+                event,
+                workflows,
+                statusName
+            });
+        }
+        else {
+            console.log(JSON.stringify(context, null, 2));
             throw new Error('This action can only be triggered by the workflow_run.completed event');
         }
-        await (0, required_1.required)({
-            octokit,
-            context,
-            event: context.payload.workflow_run,
-            workflows,
-            statusName
-        });
     }
     catch (error) {
         // Fail the workflow run if an error occurs
@@ -29269,6 +29276,7 @@ exports.run = run;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.required = void 0;
 async function required({ octokit, context, event, workflows, statusName }) {
+    console.log(JSON.stringify(event, null, 2));
     const workflow = await octokit.rest.actions.getWorkflowRun({
         ...context.repo,
         run_id: event.workflow_run.id

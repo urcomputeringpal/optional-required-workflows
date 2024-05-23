@@ -17,8 +17,8 @@ export async function run(): Promise<void> {
     const octokit = github.getOctokit(token)
     const { context } = github
     if (
-      context.eventName == 'workflow_run' &&
-      context.payload.action == 'completed' &&
+      context.eventName === 'workflow_run' &&
+      context.payload.action === 'completed' &&
       context.payload.workflow !== undefined &&
       context.payload.workflow_run !== undefined
     ) {
