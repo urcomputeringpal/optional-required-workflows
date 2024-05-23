@@ -1,4 +1,4 @@
-name: Required workflows
+name: Optional required workflows
 description: >-
   Configure required workflows in your repository. Use path filters. Leave your
   GitHub org administrator alone.
