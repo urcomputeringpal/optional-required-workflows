@@ -47,7 +47,7 @@ jobs:
     if:
       contains(fromJSON('["merge_group", "pull_request"]'),
       github.event.workflow_run.event)
-    name: Create appropriate status
+    name: Check required workflow status
     runs-on: ubuntu-latest
     permissions:
       contents: read

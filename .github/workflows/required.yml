@@ -16,12 +16,16 @@ permissions:
   actions: read
   statuses: write
 
+run-name: >
+  Process ${{ github.event.workflow_run.conclusion }} of ${{
+  github.event.workflow_run.name }}
+
 jobs:
   success:
     if:
       contains(fromJSON('["merge_group", "pull_request"]'),
       github.event.workflow_run.event)
-    name: Create appropriate status
+    name: Check required workflow status
     runs-on: ubuntu-latest
     permissions:
       contents: read
