@@ -3,8 +3,8 @@
 Configure required workflows in your repository. Use path filters. Leave your
 GitHub org administrator alone.
 
-Using this action to configuring required workflows in a GitHub Actions workflow
-protected by a `CODEOWNERS` file instead of in your repository settings.
+Use this Action to configuring required workflows in a workflow file protected
+by `CODEOWNERS` in your repository instead of in your repository settings.
 
 ## How it works
 
