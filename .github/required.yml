@@ -1,6 +1,5 @@
 # Create a Status named 'Required' that reports the observed conclusion of all
-# WorkflowRuns with a name matching `/required/i` on the same `head_sha` as the
-# observed WorkflowRun.
+# matching WorkflowRuns on the same `head_sha` as the observed WorkflowRun.
 name: Required
 
 on:
