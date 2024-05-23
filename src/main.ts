@@ -22,7 +22,8 @@ export async function run(): Promise<void> {
       context.payload.workflow !== undefined &&
       context.payload.workflow_run !== undefined
     ) {
-      const event: WorkflowRunCompletedEvent = github.context.payload as WorkflowRunCompletedEvent
+      const event: WorkflowRunCompletedEvent = github.context
+        .payload as WorkflowRunCompletedEvent
       await required({
         octokit,
         context,
