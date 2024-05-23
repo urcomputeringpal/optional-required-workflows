@@ -4,6 +4,10 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - '**/*.ts'
+      - '**/*.json'
+      # - .github/workflows/ci.yml
   push:
     branches:
       - main

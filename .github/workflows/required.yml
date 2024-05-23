@@ -1,10 +1,22 @@
-# Create a Status named 'Required' that reports the observed conclusion of all
-# matching WorkflowRuns on the same `head_sha` as the observed WorkflowRun.
 name: Required
 
 on:
   workflow_run:
     workflows:
+      # Add workflows here to mark them as required if observed on pull request
+      # or merge group events. If any of them fail, the a failing status will
+      # be created. At least one of these workflows must succeed for this
+      # workflow to succeed.
+      #
+      # Workflows in this list **may** use `paths` to match only run when
+      # certain files or directories change. As opposed to the traditional
+      # required status setting on GitHub repositories, a PR will not be
+      # blocked if it skips a workflow in this list.
+      #
+      # !!! IMPORTANT !!! ##
+      # This list must match the list passed to must-succeed-if-run argument
+      # at the end of this workflow file
+      #
       - Check Transpiled JavaScript
       - Continuous Integration
       - Lint Codebase
@@ -21,11 +33,11 @@ run-name: >
   github.event.workflow_run.name }}
 
 jobs:
-  success:
+  status:
     if:
       contains(fromJSON('["merge_group", "pull_request"]'),
       github.event.workflow_run.event)
-    name: Check required workflow status
+    name: Create status summarizing conclusion of required workflows
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -37,6 +49,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           status-name: Required
+          # !!! IMPORTANT !!! ##
+          # This list must match the list passed to on.workflow_run.workflows
           must-succeed-if-run: |
             Check Transpiled JavaScript
             Continuous Integration
