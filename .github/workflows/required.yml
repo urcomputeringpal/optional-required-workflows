@@ -18,6 +18,10 @@ jobs:
       github.event.workflow_run.event)
     name: Create appropriate status
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      statuses: write
     steps:
       - uses: actions/checkout@v3
       - uses: ./
