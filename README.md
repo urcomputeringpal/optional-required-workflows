@@ -1,10 +1,12 @@
 # Required workflows
 
-Configure required workflows in your repository. Use path filters. Be free.
+Configure required workflows in your repository. Use path filters. Leave your GitHub org administrator alone.
 
 ## Usage
 
-```
+- Add an workflow like the following:
+
+```yaml
 name: Required
 
 on:
@@ -23,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: ./
+      - uses: urcomputeringpal/required-workflows@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           status-name: Required
@@ -32,3 +34,5 @@ jobs:
             Continuous Integration
             Lint Codebase
 ```
+
+- Use `CODEOWNERS` to protect the contents of this file on your default branch
