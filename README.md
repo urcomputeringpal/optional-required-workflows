@@ -1,3 +1,3 @@
 # Required workflows
 
-Configure required workflows in your repo. Use path filters. Be free.
+Configure required workflows in your repository. Use path filters. Be free.
