@@ -29295,7 +29295,7 @@ async function required({ octokit, context, event, workflows, statusName }) {
         });
         const selectedWorkflows = workflowRuns.data.workflow_runs.filter(w => w.name !== undefined && w.name !== null && workflows.includes(w.name));
         const successfullWorkflows = selectedWorkflows.filter(w => w.conclusion === 'success');
-        const unSuccessfulWorkflows = selectedWorkflows.filter(w => w.conclusion !== 'success');
+        const unSuccessfulWorkflows = selectedWorkflows.filter(w => w.conclusion !== 'success' && w.conclusion !== null);
         const pendingWorkflows = selectedWorkflows.filter(w => w.conclusion === null);
         console.log(`Expected workflows: ${workflows.join(', ')}`);
         console.log(`Found: ${selectedWorkflows.length}, successful: ${successfullWorkflows.length}, unsuccessful: ${unSuccessfulWorkflows.length}, pending: ${pendingWorkflows.length}`);

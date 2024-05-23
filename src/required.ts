@@ -48,7 +48,7 @@ export async function required({
       w => w.conclusion === 'success'
     )
     const unSuccessfulWorkflows = selectedWorkflows.filter(
-      w => (w.conclusion !== 'success' && w.conclusion !== null)
+      w => w.conclusion !== 'success' && w.conclusion !== null
     )
     const pendingWorkflows = selectedWorkflows.filter(
       w => w.conclusion === null
