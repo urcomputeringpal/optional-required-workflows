@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: urcomputeringpal/required-workflows@v1
+      - uses: urcomputeringpal/required-workflows@main
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           status-name: Required
