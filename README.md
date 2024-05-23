@@ -10,12 +10,12 @@ by `CODEOWNERS` in your repository instead of in your repository settings.
 
 - A workflow in your repository is created that calls this Action
 - This workflow contains a list of other workflows that are required to pass
-- When any of those workflows complete on a PR, this workflow will check to see
-  if ANY of them are present on the same SHA
+- When **at least one** of those workflows **complete** on a PR, this workflow will check to see
+  if **any other listed workflows** are present on the same SHA
 - If **all** of the matching workflows on the same SHA **have passed**, this
-  workflow will create a success status
-- If **any** of the matching workflows on the same SHA **are missing**, this
-  workflow **will still create a success status**
+  workflow will create a successful status
+- If **some** of the matching workflows on the same SHA **are missing**, this
+  workflow **will still create a successful status**
   - This allows you to use path filters to skip certain workflows on certain
     paths and still mark them as required.
 - If **any** of the matching workflows on the same SHA **have failed**, this
