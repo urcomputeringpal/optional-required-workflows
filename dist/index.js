@@ -29326,6 +29326,17 @@ async function required({ octokit, context, event, workflows, statusName }) {
             // sleep for a few seconds
             continue;
         }
+        if (pendingWorkflows.length > 0) {
+            await octokit.rest.repos.createCommitStatus({
+                ...context.repo,
+                sha: head_sha,
+                state: 'pending',
+                context: statusName,
+                description: `${pendingWorkflows.length} of ${selectedWorkflows.length} required workflows are still pending...`,
+                target_url: pendingWorkflows[0].html_url
+            });
+            return;
+        }
         allRequiredSucceeded =
             unSuccessfulWorkflows.length === 0 && pendingWorkflows.length === 0;
     }
