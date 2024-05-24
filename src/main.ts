@@ -14,6 +14,10 @@ export async function run(): Promise<void> {
     })
     const statusName = core.getInput('status-name', { required: true })
     const token = core.getInput('token', { required: true })
+    const delay = parseInt(core.getInput('delay', { required: false }) || '100')
+    const retries = parseInt(
+      core.getInput('retries', { required: false }) || '2'
+    )
     const octokit = github.getOctokit(token)
     const { context } = github
     if (
@@ -29,7 +33,9 @@ export async function run(): Promise<void> {
         context,
         event,
         workflows,
-        statusName
+        statusName,
+        retries,
+        delay
       })
     } else {
       console.log(JSON.stringify(context, null, 2))

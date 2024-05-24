@@ -29236,6 +29236,8 @@ async function run() {
         });
         const statusName = core.getInput('status-name', { required: true });
         const token = core.getInput('token', { required: true });
+        const delay = parseInt(core.getInput('delay', { required: false }) || '100');
+        const retries = parseInt(core.getInput('retries', { required: false }) || '2');
         const octokit = github.getOctokit(token);
         const { context } = github;
         if (context.eventName === 'workflow_run' &&
@@ -29249,7 +29251,9 @@ async function run() {
                 context,
                 event,
                 workflows,
-                statusName
+                statusName,
+                retries,
+                delay
             });
         }
         else {
@@ -29275,32 +29279,47 @@ exports.run = run;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.required = void 0;
-async function required({ octokit, context, event, workflows, statusName }) {
-    console.log(JSON.stringify(event, null, 2));
+async function required({ octokit, context, event, workflows, statusName, retries = 2, delay = 100 }) {
+    // console.log(JSON.stringify(event, null, 2))
     const workflow = await octokit.rest.actions.getWorkflowRun({
         ...context.repo,
         run_id: event.workflow_run.id
     });
+    // Validate workflow data for undefined before accessing properties
+    if (!workflow.data) {
+        throw new Error('Workflow data is undefined.');
+    }
     const head_sha = workflow.data.head_sha;
-    console.log(`Processing ${workflow.data.name} ${workflow.data.html_url}`);
-    console.log(`https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${workflow.data.head_sha}/checks`);
-    let observedCurrent = false;
-    let allRequiredSucceeded = false;
-    while (observedCurrent === false) {
+    console.log(`Processing completion event for ${workflow.data.name} (WorkflowRun#${workflow.data.id})`);
+    const checksUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${workflow.data.head_sha}/checks`;
+    let observedWorkflowRunFromEvent = false;
+    let reportedRetry = false;
+    let retryCount = 0;
+    while (observedWorkflowRunFromEvent === false) {
+        retryCount += 1;
+        if (retryCount > retries) {
+            console.log(`Exceeded ${retries}, giving up.`);
+            return;
+        }
         const workflowRuns = await octokit.rest.actions.listWorkflowRunsForRepo({
             ...context.repo,
             head_sha,
             // reasonable defaults
             per_page: 100
         });
-        const selectedWorkflows = workflowRuns.data.workflow_runs.filter(w => w.name !== undefined && w.name !== null && workflows.includes(w.name));
-        const successfullWorkflows = selectedWorkflows.filter(w => w.conclusion === 'success');
-        const unSuccessfulWorkflows = selectedWorkflows.filter(w => w.conclusion !== 'success' && w.conclusion !== null);
-        const pendingWorkflows = selectedWorkflows.filter(w => w.conclusion === null);
+        // Validate workflowRuns data for undefined before accessing properties
+        if (!workflowRuns.data || !workflowRuns.data.workflow_runs) {
+            throw new Error('Workflow runs data is undefined.');
+        }
+        const matchingWorkflows = workflowRuns.data.workflow_runs.filter(w => w.name !== undefined && w.name !== null && workflows.includes(w.name));
+        const successfullWorkflows = matchingWorkflows.filter(w => w.conclusion === 'success');
+        const unSuccessfulWorkflows = matchingWorkflows.filter(w => w.conclusion !== 'success' && w.conclusion !== null);
+        const pendingWorkflows = matchingWorkflows.filter(w => w.conclusion === null);
+        observedWorkflowRunFromEvent =
+            matchingWorkflows.filter(w => w.id === event.workflow_run.id).length > 0;
+        console.log(`WorkflowRuns ID ${event.workflow_run.id} ${observedWorkflowRunFromEvent ? 'found' : 'not found'} in WorkflowRuns returned from API: ${matchingWorkflows.map(w => w.id).join(', ')}`);
         console.log(`Expected workflows: ${workflows.join(', ')}`);
-        console.log(`Found: ${selectedWorkflows.length}, successful: ${successfullWorkflows.length}, unsuccessful: ${unSuccessfulWorkflows.length}, pending: ${pendingWorkflows.length}`);
-        observedCurrent =
-            pendingWorkflows.filter(w => w.id === event.workflow_run.id).length === 0;
+        console.log(`Found ${matchingWorkflows.length} total, ${successfullWorkflows.length} successful, ${unSuccessfulWorkflows.length} unsuccessful, ${pendingWorkflows.length} pending`);
         // Report failure immediately
         if (unSuccessfulWorkflows.length > 0) {
             await octokit.rest.repos.createCommitStatus({
@@ -29308,22 +29327,26 @@ async function required({ octokit, context, event, workflows, statusName }) {
                 sha: head_sha,
                 state: 'failure',
                 context: statusName,
-                description: `${unSuccessfulWorkflows.length} of ${selectedWorkflows.length} required workflows were not successful.`,
+                description: `${unSuccessfulWorkflows.length} of ${matchingWorkflows.length} required workflows were not successful`,
                 target_url: unSuccessfulWorkflows[0].html_url
             });
             return;
         }
-        if (!observedCurrent) {
-            await octokit.rest.repos.createCommitStatus({
-                ...context.repo,
-                sha: head_sha,
-                state: 'pending',
-                context: statusName,
-                description: `Waiting for conclusion to be reported for ${event.workflow_run.name}...`,
-                target_url: event.workflow_run.html_url
-            });
+        if (!observedWorkflowRunFromEvent) {
+            if (!reportedRetry) {
+                await octokit.rest.repos.createCommitStatus({
+                    ...context.repo,
+                    sha: head_sha,
+                    state: 'pending',
+                    context: statusName,
+                    description: `Waiting for conclusion to be reported for ${event.workflow_run.name}...`,
+                    target_url: event.workflow_run.html_url
+                });
+                reportedRetry = true;
+            }
+            console.log(`Waiting for ${delay}ms before retrying...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
             // throw a warning or something
-            // sleep for a few seconds
             continue;
         }
         if (pendingWorkflows.length > 0) {
@@ -29332,24 +29355,38 @@ async function required({ octokit, context, event, workflows, statusName }) {
                 sha: head_sha,
                 state: 'pending',
                 context: statusName,
-                description: `${pendingWorkflows.length} of ${selectedWorkflows.length} required workflows are still pending...`,
+                description: `${pendingWorkflows.length} of ${matchingWorkflows.length} required workflows are still pending...`,
                 target_url: pendingWorkflows[0].html_url
             });
             return;
         }
-        allRequiredSucceeded =
-            unSuccessfulWorkflows.length === 0 && pendingWorkflows.length === 0;
-    }
-    // report success if all required workflows we observed had a successful status
-    if (allRequiredSucceeded) {
-        console.log(`Reporting success on ${head_sha}`);
-        await octokit.rest.repos.createCommitStatus({
-            ...context.repo,
-            sha: head_sha,
-            state: 'success',
-            context: statusName,
-            description: 'All required workflows have succeeded.'
-        });
+        // report success if all required workflows we observed had a successful status
+        if (observedWorkflowRunFromEvent &&
+            successfullWorkflows.length > 0 &&
+            unSuccessfulWorkflows.length === 0 &&
+            pendingWorkflows.length === 0) {
+            console.log(`Reporting success on ${head_sha}`);
+            await octokit.rest.repos.createCommitStatus({
+                ...context.repo,
+                sha: head_sha,
+                state: 'success',
+                context: statusName,
+                description: `All ${successfullWorkflows.length} observed required workflows have succeeded`,
+                target_url: checksUrl
+            });
+            return;
+        }
+        const eventJson = JSON.stringify(event, null, 2);
+        const workflowRunsJson = JSON.stringify(workflowRuns, null, 2);
+        throw new Error(`Unhandled state
+      event: ${eventJson}
+      workflowRuns: ${workflowRunsJson}
+      observedWorkflowRunFromEvent: ${observedWorkflowRunFromEvent}
+      matchingWorkflows: ${matchingWorkflows.length}
+      successfullWorkflows: ${successfullWorkflows.length}
+      unSuccessfulWorkflows: ${unSuccessfulWorkflows.length}
+      pendingWorkflows: ${pendingWorkflows.length}
+      `);
     }
 }
 exports.required = required;
