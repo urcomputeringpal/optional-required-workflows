@@ -54,10 +54,12 @@ describe('required', () => {
       statusName: 'Required'
     })
 
-    expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(expect.objectContaining({
-      state: 'success',
-      description: 'All required workflows have succeeded.'
-    }))
+    expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: 'success',
+        description: 'All required workflows have succeeded.'
+      })
+    )
   })
 
   it('should handle only one of the required statuses reporting success', async () => {
@@ -79,10 +81,14 @@ describe('required', () => {
       statusName: 'Required'
     })
 
-    expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(expect.objectContaining({
-      state: 'pending',
-      description: expect.stringContaining('required workflows are still pending...')
-    }))
+    expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: 'pending',
+        description: expect.stringContaining(
+          'required workflows are still pending...'
+        )
+      })
+    )
   })
 
   it('should handle one of the required statuses reporting failure', async () => {
@@ -104,10 +110,14 @@ describe('required', () => {
       statusName: 'Required'
     })
 
-    expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(expect.objectContaining({
-      state: 'failure',
-      description: expect.stringContaining('required workflows were not successful.')
-    }))
+    expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: 'failure',
+        description: expect.stringContaining(
+          'required workflows were not successful.'
+        )
+      })
+    )
   })
 
   it('should handle replication lag scenario', async () => {
@@ -129,9 +139,13 @@ describe('required', () => {
       statusName: 'Required'
     })
 
-    expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(expect.objectContaining({
-      state: 'pending',
-      description: expect.stringContaining('Waiting for conclusion to be reported for Test Workflow...')
-    }))
+    expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: 'pending',
+        description: expect.stringContaining(
+          'Waiting for conclusion to be reported for Test Workflow...'
+        )
+      })
+    )
   })
 })
