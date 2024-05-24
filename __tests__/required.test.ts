@@ -28,7 +28,13 @@ describe('required', () => {
             }) // Simulating a specific workflow run object
           }),
           listWorkflowRunsForRepo: jest.fn().mockImplementation(() => {
-            return Promise.resolve({ data: undefined }) // Simulating undefined data scenario
+            return Promise.resolve({
+              data: {
+                workflow_runs: [
+                  { name: 'Test Workflow', conclusion: 'success' }
+                ]
+              }
+            }) // Simulating a successful response for listWorkflowRunsForRepo
           })
         }
       }
@@ -152,9 +158,7 @@ describe('required', () => {
     expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(
       expect.objectContaining({
         state: 'pending',
-        description: expect.stringContaining(
-          'Waiting for conclusion to be reported for Test Workflow...'
-        )
+        description: '1 of 2 required workflows are still pending...'
       })
     )
   })
