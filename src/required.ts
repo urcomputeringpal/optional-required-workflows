@@ -23,6 +23,11 @@ export async function required({
     run_id: event.workflow_run.id
   })
 
+  // Validate workflow data for undefined before accessing properties
+  if (!workflow.data) {
+    throw new Error('Workflow data is undefined.')
+  }
+
   const head_sha = workflow.data.head_sha
 
   console.log(`Processing ${workflow.data.name} ${workflow.data.html_url}`)
@@ -40,6 +45,11 @@ export async function required({
       // reasonable defaults
       per_page: 100
     })
+
+    // Validate workflowRuns data for undefined before accessing properties
+    if (!workflowRuns.data || !workflowRuns.data.workflow_runs) {
+      throw new Error('Workflow runs data is undefined.')
+    }
 
     const selectedWorkflows = workflowRuns.data.workflow_runs.filter(
       w => w.name !== undefined && w.name !== null && workflows.includes(w.name)

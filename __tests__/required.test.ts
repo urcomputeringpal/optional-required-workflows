@@ -9,6 +9,7 @@ describe('required', () => {
   let event: WorkflowRunCompletedEvent
 
   beforeEach(() => {
+    process.env.GITHUB_REPOSITORY = 'owner/repo' // Setting GITHUB_REPOSITORY environment variable
     mockOctokit = {
       rest: {
         repos: {
@@ -16,7 +17,9 @@ describe('required', () => {
         },
         actions: {
           getWorkflowRun: jest.fn(),
-          listWorkflowRunsForRepo: jest.fn()
+          listWorkflowRunsForRepo: jest.fn().mockImplementation(() => {
+            return Promise.resolve({ data: undefined }) // Simulating undefined data scenario
+          })
         }
       }
     }
