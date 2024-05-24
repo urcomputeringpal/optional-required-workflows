@@ -35,7 +35,7 @@ describe('required', () => {
             return Promise.resolve({
               data: {
                 workflow_runs: [
-                  { name: 'Test Workflow', conclusion: 'success' }
+                  { id: 123, name: 'Test Workflow', conclusion: 'success' }
                 ]
               }
             }) // Simulating a successful response for listWorkflowRunsForRepo
@@ -60,8 +60,8 @@ describe('required', () => {
     mockOctokit.rest.actions.listWorkflowRunsForRepo.mockResolvedValue({
       data: {
         workflow_runs: [
-          { name: 'Test Workflow', conclusion: 'success' },
-          { name: 'Another Workflow', conclusion: 'success' }
+          { id: 123, name: 'Test Workflow', conclusion: 'success' },
+          { id: 124, name: 'Another Workflow', conclusion: 'success' }
         ]
       }
     })
@@ -77,7 +77,7 @@ describe('required', () => {
     expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(
       expect.objectContaining({
         state: 'success',
-        description: 'All required workflows have succeeded.'
+        description: 'All 2 observed required workflows have succeeded'
       })
     )
   })
@@ -87,8 +87,8 @@ describe('required', () => {
     mockOctokit.rest.actions.listWorkflowRunsForRepo.mockResolvedValue({
       data: {
         workflow_runs: [
-          { name: 'Test Workflow', conclusion: 'success' },
-          { name: 'Another Workflow', conclusion: null }
+          { id: 123, name: 'Test Workflow', conclusion: 'success' },
+          { id: 124, name: 'Another Workflow', conclusion: null }
         ]
       }
     })
@@ -116,8 +116,8 @@ describe('required', () => {
     mockOctokit.rest.actions.listWorkflowRunsForRepo.mockResolvedValue({
       data: {
         workflow_runs: [
-          { name: 'Test Workflow', conclusion: 'success' },
-          { name: 'Another Workflow', conclusion: 'failure' }
+          { id: 123, name: 'Test Workflow', conclusion: 'success' },
+          { id: 124, name: 'Another Workflow', conclusion: 'failure' }
         ]
       }
     })
@@ -134,19 +134,23 @@ describe('required', () => {
       expect.objectContaining({
         state: 'failure',
         description: expect.stringContaining(
-          'required workflows were not successful.'
+          'required workflows were not successful'
         )
       })
     )
   })
 
   it('should handle replication lag scenario', async () => {
-    // Mock setup to simulate replication lag scenario
+    // Mock setup to simulate replication lag scenario where "Test workflow" isn't in the results
     mockOctokit.rest.actions.listWorkflowRunsForRepo.mockResolvedValue({
       data: {
         workflow_runs: [
-          { name: 'Test Workflow', conclusion: null },
-          { name: 'Another Workflow', conclusion: 'success' }
+          { id: 124, name: 'Another Workflow', conclusion: 'success' },
+          {
+            id: 125,
+            name: 'Another Not Required Workflow 2',
+            conclusion: 'success'
+          }
         ]
       }
     })
@@ -162,33 +166,8 @@ describe('required', () => {
     expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(
       expect.objectContaining({
         state: 'pending',
-        description: '1 of 2 required workflows are still pending...'
-      })
-    )
-  })
-
-  it('verifies behavior with getWorkflowRun returning a specific workflow run object', async () => {
-    // This test explicitly uses the mocked getWorkflowRun to verify the required function's behavior
-    await required({
-      octokit: mockOctokit as unknown as InstanceType<typeof GitHub>,
-      context,
-      event,
-      workflows: ['Test Workflow'],
-      statusName: 'Required'
-    })
-
-    expect(mockOctokit.rest.actions.getWorkflowRun).toHaveBeenCalledWith(
-      expect.objectContaining({
-        owner: 'owner',
-        repo: 'repo',
-        run_id: 123
-      })
-    )
-
-    expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(
-      expect.objectContaining({
-        state: 'success',
-        description: 'All required workflows have succeeded.'
+        description:
+          'Waiting for conclusion to be reported for Test Workflow...'
       })
     )
   })

@@ -24,6 +24,17 @@ inputs:
       A multi-line string of the names of workflows that must succeed if a run
       is observed.
     required: true
+  retries:
+    description: >
+      The number of times to query for updated WorkflowRun statues if we don't
+      observe the conclusion of the run we're looking for before giving up.
+    required: false
+    default: '3'
+  delay:
+    description: >
+      The delay in milliseconds to wait between retries.
+    required: false
+    default: '100'
 
 runs:
   using: node20
