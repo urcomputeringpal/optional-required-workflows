@@ -16,7 +16,17 @@ describe('required', () => {
           createCommitStatus: jest.fn()
         },
         actions: {
-          getWorkflowRun: jest.fn(),
+          getWorkflowRun: jest.fn().mockImplementation(() => {
+            return Promise.resolve({
+              data: {
+                id: 123,
+                name: 'Test Workflow',
+                head_sha: 'abc123',
+                conclusion: 'success',
+                html_url: 'http://example.com'
+              }
+            }) // Simulating a specific workflow run object
+          }),
           listWorkflowRunsForRepo: jest.fn().mockImplementation(() => {
             return Promise.resolve({ data: undefined }) // Simulating undefined data scenario
           })
@@ -145,6 +155,32 @@ describe('required', () => {
         description: expect.stringContaining(
           'Waiting for conclusion to be reported for Test Workflow...'
         )
+      })
+    )
+  })
+
+  it('verifies behavior with getWorkflowRun returning a specific workflow run object', async () => {
+    // This test explicitly uses the mocked getWorkflowRun to verify the required function's behavior
+    await required({
+      octokit: mockOctokit as unknown as InstanceType<typeof GitHub>,
+      context,
+      event,
+      workflows: ['Test Workflow'],
+      statusName: 'Required'
+    })
+
+    expect(mockOctokit.rest.actions.getWorkflowRun).toHaveBeenCalledWith(
+      expect.objectContaining({
+        owner: 'owner',
+        repo: 'repo',
+        run_id: 123
+      })
+    )
+
+    expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: 'success',
+        description: 'All required workflows have succeeded.'
       })
     )
   })
