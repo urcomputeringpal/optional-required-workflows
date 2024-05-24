@@ -3,8 +3,8 @@
 Configure required workflows in your repository. Use path filters. Leave your
 GitHub org administrator alone.
 
-Use this Action to configure required workflows in a workflow file protected
-by `CODEOWNERS` in your repository instead of in your repository settings.
+Use this Action to configure required workflows in a workflow file protected by
+`CODEOWNERS` in your repository instead of in your repository settings.
 
 [![Lint](https://github.com/urcomputeringpal/optional-required-workflows/actions/workflows/linter.yml/badge.svg)](https://github.com/urcomputeringpal/optional-required-workflows/actions/workflows/linter.yml?query=branch%3Amain)
 [![CI](https://github.com/urcomputeringpal/optional-required-workflows/actions/workflows/ci.yml/badge.svg)](https://github.com/urcomputeringpal/optional-required-workflows/actions/workflows/ci.yml?query=branch%3Amain)
