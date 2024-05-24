@@ -29281,6 +29281,10 @@ async function required({ octokit, context, event, workflows, statusName }) {
         ...context.repo,
         run_id: event.workflow_run.id
     });
+    // Validate workflow data for undefined before accessing properties
+    if (!workflow.data) {
+        throw new Error('Workflow data is undefined.');
+    }
     const head_sha = workflow.data.head_sha;
     console.log(`Processing ${workflow.data.name} ${workflow.data.html_url}`);
     console.log(`https://github.com/${context.repo.owner}/${context.repo.repo}/commit/${workflow.data.head_sha}/checks`);
@@ -29293,6 +29297,10 @@ async function required({ octokit, context, event, workflows, statusName }) {
             // reasonable defaults
             per_page: 100
         });
+        // Validate workflowRuns data for undefined before accessing properties
+        if (!workflowRuns.data || !workflowRuns.data.workflow_runs) {
+            throw new Error('Workflow runs data is undefined.');
+        }
         const selectedWorkflows = workflowRuns.data.workflow_runs.filter(w => w.name !== undefined && w.name !== null && workflows.includes(w.name));
         const successfullWorkflows = selectedWorkflows.filter(w => w.conclusion === 'success');
         const unSuccessfulWorkflows = selectedWorkflows.filter(w => w.conclusion !== 'success' && w.conclusion !== null);

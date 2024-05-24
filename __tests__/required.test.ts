@@ -1,9 +1,11 @@
 import { required } from '../src/required'
 import { GitHub } from '@actions/github/lib/utils'
 import { Context } from '@actions/github/lib/context'
+// eslint-disable-next-line import/no-unresolved
 import { WorkflowRunCompletedEvent } from '@octokit/webhooks-types'
 
 describe('required', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockOctokit: any
   let context: Context
   let event: WorkflowRunCompletedEvent
@@ -16,6 +18,7 @@ describe('required', () => {
           createCommitStatus: jest.fn()
         },
         actions: {
+          // eslint-disable-next-line @typescript-eslint/promise-function-async
           getWorkflowRun: jest.fn().mockImplementation(() => {
             return Promise.resolve({
               data: {
@@ -27,6 +30,7 @@ describe('required', () => {
               }
             }) // Simulating a specific workflow run object
           }),
+          // eslint-disable-next-line @typescript-eslint/promise-function-async
           listWorkflowRunsForRepo: jest.fn().mockImplementation(() => {
             return Promise.resolve({
               data: {
