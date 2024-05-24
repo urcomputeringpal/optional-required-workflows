@@ -17,9 +17,9 @@ on:
       # This list must match the list passed to must-succeed-if-run argument
       # at the end of this workflow file
       #
-      - Check Transpiled JavaScript
-      - Continuous Integration
-      - Lint Codebase
+      - Bundle JavaScript
+      - CI
+      - Lint
     types:
       - completed
 
@@ -52,6 +52,6 @@ jobs:
           # !!! IMPORTANT !!! ##
           # This list must match the list passed to on.workflow_run.workflows
           must-succeed-if-run: |
-            Check Transpiled JavaScript
-            Continuous Integration
-            Lint Codebase
+            Bundle JavaScript
+            CI Integration
+            Lint
