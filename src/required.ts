@@ -66,10 +66,10 @@ export async function required({
       w => w.name !== undefined && w.name !== null && workflows.includes(w.name)
     )
     const successfullWorkflows = matchingWorkflows.filter(
-      w => w.conclusion === 'success'
+      w => w.conclusion === 'success' || w.conclusion === 'skipped'
     )
     const unSuccessfulWorkflows = matchingWorkflows.filter(
-      w => w.conclusion !== 'success' && w.conclusion !== null
+      w => w.conclusion !== 'success' && w.conclusion !== 'skipped' && w.conclusion !== null
     )
     const pendingWorkflows = matchingWorkflows.filter(
       w => w.conclusion === null
@@ -83,7 +83,7 @@ export async function required({
 
     console.log(`Expected workflows: ${workflows.join(', ')}`)
     console.log(
-      `Found ${matchingWorkflows.length} total, ${successfullWorkflows.length} successful, ${unSuccessfulWorkflows.length} unsuccessful, ${pendingWorkflows.length} pending`
+      `Found ${matchingWorkflows.length} total, ${successfullWorkflows.length} successful or skipped, ${unSuccessfulWorkflows.length} unsuccessful, ${pendingWorkflows.length} pending`
     )
 
     // Report failure immediately
@@ -129,7 +129,7 @@ export async function required({
       return
     }
 
-    // report success if all required workflows we observed had a successful status
+    // report success if all required workflows we observed had a successful or skipped status
     if (
       observedWorkflowRunFromEvent &&
       successfullWorkflows.length > 0 &&
@@ -142,7 +142,7 @@ export async function required({
         sha: head_sha,
         state: 'success',
         context: statusName,
-        description: `All ${successfullWorkflows.length} observed required workflows have succeeded`,
+        description: `All ${successfullWorkflows.length} observed required workflows have succeeded or been skipped`,
         target_url: checksUrl
       })
       return
