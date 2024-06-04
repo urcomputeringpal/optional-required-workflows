@@ -69,7 +69,10 @@ export async function required({
       w => w.conclusion === 'success' || w.conclusion === 'skipped'
     )
     const unSuccessfulWorkflows = matchingWorkflows.filter(
-      w => w.conclusion !== 'success' && w.conclusion !== 'skipped' && w.conclusion !== null
+      w =>
+        w.conclusion !== 'success' &&
+        w.conclusion !== 'skipped' &&
+        w.conclusion !== null
     )
     const pendingWorkflows = matchingWorkflows.filter(
       w => w.conclusion === null
@@ -142,7 +145,7 @@ export async function required({
         sha: head_sha,
         state: 'success',
         context: statusName,
-        description: `All ${successfullWorkflows.length} observed required workflows have succeeded or been skipped`,
+        description: `All ${successfullWorkflows.length} observed required workflows were successful or skipped`,
         target_url: checksUrl
       })
       return

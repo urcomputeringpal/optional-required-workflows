@@ -29312,14 +29312,16 @@ async function required({ octokit, context, event, workflows, statusName, retrie
             throw new Error('Workflow runs data is undefined.');
         }
         const matchingWorkflows = workflowRuns.data.workflow_runs.filter(w => w.name !== undefined && w.name !== null && workflows.includes(w.name));
-        const successfullWorkflows = matchingWorkflows.filter(w => w.conclusion === 'success');
-        const unSuccessfulWorkflows = matchingWorkflows.filter(w => w.conclusion !== 'success' && w.conclusion !== null);
+        const successfullWorkflows = matchingWorkflows.filter(w => w.conclusion === 'success' || w.conclusion === 'skipped');
+        const unSuccessfulWorkflows = matchingWorkflows.filter(w => w.conclusion !== 'success' &&
+            w.conclusion !== 'skipped' &&
+            w.conclusion !== null);
         const pendingWorkflows = matchingWorkflows.filter(w => w.conclusion === null);
         observedWorkflowRunFromEvent =
             matchingWorkflows.filter(w => w.id === event.workflow_run.id).length > 0;
         console.log(`WorkflowRuns ID ${event.workflow_run.id} ${observedWorkflowRunFromEvent ? 'found' : 'not found'} in WorkflowRuns returned from API: ${matchingWorkflows.map(w => w.id).join(', ')}`);
         console.log(`Expected workflows: ${workflows.join(', ')}`);
-        console.log(`Found ${matchingWorkflows.length} total, ${successfullWorkflows.length} successful, ${unSuccessfulWorkflows.length} unsuccessful, ${pendingWorkflows.length} pending`);
+        console.log(`Found ${matchingWorkflows.length} total, ${successfullWorkflows.length} successful or skipped, ${unSuccessfulWorkflows.length} unsuccessful, ${pendingWorkflows.length} pending`);
         // Report failure immediately
         if (unSuccessfulWorkflows.length > 0) {
             await octokit.rest.repos.createCommitStatus({
@@ -29360,7 +29362,7 @@ async function required({ octokit, context, event, workflows, statusName, retrie
             });
             return;
         }
-        // report success if all required workflows we observed had a successful status
+        // report success if all required workflows we observed had a successful or skipped status
         if (observedWorkflowRunFromEvent &&
             successfullWorkflows.length > 0 &&
             unSuccessfulWorkflows.length === 0 &&
@@ -29371,7 +29373,7 @@ async function required({ octokit, context, event, workflows, statusName, retrie
                 sha: head_sha,
                 state: 'success',
                 context: statusName,
-                description: `All ${successfullWorkflows.length} observed required workflows have succeeded`,
+                description: `All ${successfullWorkflows.length} observed required workflows were successful or skipped`,
                 target_url: checksUrl
             });
             return;

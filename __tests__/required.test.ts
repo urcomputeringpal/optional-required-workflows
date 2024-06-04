@@ -77,7 +77,8 @@ describe('required', () => {
     expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(
       expect.objectContaining({
         state: 'success',
-        description: 'All 2 observed required workflows have succeeded'
+        description:
+          'All 2 observed required workflows were successful or skipped'
       })
     )
   })
@@ -195,7 +196,8 @@ describe('required', () => {
     expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(
       expect.objectContaining({
         state: 'success',
-        description: 'All 2 observed required workflows have succeeded or been skipped'
+        description:
+          'All 2 observed required workflows were successful or skipped'
       })
     )
   })
