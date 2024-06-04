@@ -1,0 +1,11 @@
+name: Skip
+on:
+  pull_request
+
+jobs:
+  skip:
+    name: skip
+    if: false
+    runs-on: ubuntu-latest
+    steps: 
+      - run: 'true'
