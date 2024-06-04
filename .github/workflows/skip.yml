@@ -1,6 +1,5 @@
 name: Skip
-on:
-  pull_request
+on: pull_request
 
 permissions:
   contents: read
@@ -12,5 +11,5 @@ jobs:
     name: skip
     if: false
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - run: 'true'
