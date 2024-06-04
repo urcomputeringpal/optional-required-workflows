@@ -20,6 +20,7 @@ on:
       - Bundle JavaScript
       - CI
       - Lint
+      - Skip
     types:
       - completed
 
@@ -55,3 +56,4 @@ jobs:
             Bundle JavaScript
             CI Integration
             Lint
+            Skip

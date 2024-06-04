@@ -77,7 +77,8 @@ describe('required', () => {
     expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(
       expect.objectContaining({
         state: 'success',
-        description: 'All 2 observed required workflows have succeeded'
+        description:
+          'All 2 observed required workflows were successful or skipped'
       })
     )
   })
@@ -168,6 +169,35 @@ describe('required', () => {
         state: 'pending',
         description:
           'Waiting for conclusion to be reported for Test Workflow...'
+      })
+    )
+  })
+
+  // New test case to verify behavior for skipped workflows
+  it('should treat skipped workflows as successful', async () => {
+    // Mock setup to simulate a skipped workflow scenario
+    mockOctokit.rest.actions.listWorkflowRunsForRepo.mockResolvedValue({
+      data: {
+        workflow_runs: [
+          { id: 123, name: 'Test Workflow', conclusion: 'skipped' },
+          { id: 124, name: 'Another Workflow', conclusion: 'success' }
+        ]
+      }
+    })
+
+    await required({
+      octokit: mockOctokit as unknown as InstanceType<typeof GitHub>,
+      context,
+      event,
+      workflows: ['Test Workflow', 'Another Workflow'],
+      statusName: 'Required'
+    })
+
+    expect(mockOctokit.rest.repos.createCommitStatus).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: 'success',
+        description:
+          'All 2 observed required workflows were successful or skipped'
       })
     )
   })
